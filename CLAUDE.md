@@ -18,6 +18,10 @@ npx http-server -p 5173 -c-1
 
 `sw.js` is network-first, but if a change does not show up, unregister the service worker or hard-reload. When adding a new page or JS/CSS file, add it to the `ASSETS` list in `sw.js`.
 
+- Deploy: GitHub `ultraJH-collab/Save_Charge` `main` → Vercel static hosting (no build). `vercel.json` sets `sw.js` to no-cache; keep that when editing headers.
+- `.claude/launch.json` points to a `serve.js` in an old session's temp scratchpad. If preview fails to start, switch it to `npx http-server -p 5173 -c-1`.
+- Verify ranking from the page console: `SC.cost.rank(SC.store.get().search.base, { search: {...search, sort, radius}, vot })` → check `best`, `results`, `gap`. Unregister the SW and reload with `?t=` first.
+
 ## Architecture
 
 **Script loading, no modules.** Every page loads classic `<script>` tags that attach to one global namespace `window.SC`. Load order matters and is the same on every page:
