@@ -178,7 +178,7 @@
       b.setAttribute('aria-pressed', String(on));
     });
     $('results-summary').textContent = '반경 ' + s.radius + 'km · ' + res.all.length + '곳 · 평균 ' +
-      U.num(res.avgPrice) + priceUnit();
+      U.num(res.avgPrice) + priceUnit() + (res.best ? ' · 최저 실질 비용 ' + U.won(res.best.total) : '');
 
     var list = $('result-list');
     if (!res.results.length) {
@@ -195,11 +195,11 @@
       return {
         id: r.station.id, lat: r.station.lat, lng: r.station.lng,
         label: U.num(r.unitPrice), rank: r.recRank <= 3 ? r.recRank : 0, top: r.recRank === 1,
-        // 주변 평균 실질 비용 대비 이득(+)/손해(−)
-        saving: Math.round(r.saving),
-        sub: (r.saving >= 1 ? '+' : '−') + U.num(Math.abs(r.saving)) + '원',
-        title: r.station.name + ' ' + U.num(r.unitPrice) + priceUnit() + ', 평균보다 ' +
-          U.won(Math.abs(r.saving)) + (r.saving >= 1 ? ' 이득' : ' 손해')
+        // 최저 실질 비용 업장 대비 추가 비용 (최저 업장은 '최저')
+        gap: Math.round(r.gap),
+        sub: r.gap < 1 ? '최저' : '+' + U.num(r.gap) + '원',
+        title: r.station.name + ' ' + U.num(r.unitPrice) + priceUnit() + ', ' +
+          (r.gap < 1 ? '최저 실질 비용' : '최저보다 ' + U.won(r.gap) + ' 더 듦')
       };
     }));
     if (state.selected) map.select(state.selected);
@@ -228,9 +228,9 @@
     else badges.push('<span class="badge">예상치</span>');
     if (r.stale) badges.push('<span class="badge badge--danger">오래된 가격 · ' + U.ago(stn.updatedAt) + '</span>');
 
-    var saving = r.saving >= 1
-      ? '<span class="saving">평균보다 ' + U.won(r.saving) + ' 이득</span>'
-      : '<span class="saving saving--neg">평균보다 ' + U.won(-r.saving) + ' 더 듦</span>';
+    var saving = r.gap < 1
+      ? '<span class="saving">최저 비용</span>'
+      : '<span class="saving saving--neg">최저보다 +' + U.won(r.gap) + '</span>';
 
     return '<li class="result' + (top ? ' result--top' : '') + (state.selected === stn.id ? ' is-selected' : '') + '" data-id="' + stn.id + '">' +
       '<button type="button" class="result__main" data-select="' + stn.id + '" aria-label="' + U.esc(stn.name) + ' 지도에서 보기">' +

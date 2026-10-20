@@ -114,7 +114,7 @@ SC.cost = (function () {
     time: function (a, b) { return a.timeMin - b.timeMin; }
   };
 
-  /** 검색 실행 → { results, all, avgPrice, avgTotal, candidates } */
+  /** 검색 실행 → { results, all, best, avgPrice, avgTotal, ctx } */
   function rank(center, opts) {
     var st = SC.store.get();
     var vehicle = opts.vehicle || SC.store.activeVehicle();
@@ -134,13 +134,22 @@ SC.cost = (function () {
     var all = stations.map(function (s) { return evaluate(s, ctx); }).filter(Boolean);
     var avgTotal = all.length ? all.reduce(function (a, r) { return a + r.total; }, 0) / all.length : 0;
 
+    // 추천 1위 = 실질 비용 최저 업장. 모든 비교의 기준
     all.sort(SORTS.recommend);
-    all.forEach(function (r, i) { r.recRank = i + 1; r.saving = avgTotal - r.total; });
+    var best = all[0] || null;
+    all.forEach(function (r, i) {
+      r.recRank = i + 1;
+      r.gap = r.total - best.total;          // 최저 업장 대비 추가 비용 (0 = 최저)
+      r.saving = avgTotal - r.total;         // 주변 평균 대비 절약액 (리포트 기록용)
+    });
 
     var sorted = all.slice().sort(SORTS[search.sort] || SORTS.recommend);
+    var results = sorted.slice(0, cfg.RESULT_LIMIT);
+    // 다른 정렬에서도 기준(최저 업장)은 항상 목록·지도에 노출
+    if (best && results.indexOf(best) === -1) results[results.length - 1] = best;
     return {
-      kind: kind, vehicle: vehicle, avgPrice: avgPrice, avgTotal: avgTotal,
-      all: sorted, results: sorted.slice(0, cfg.RESULT_LIMIT), ctx: ctx
+      kind: kind, vehicle: vehicle, avgPrice: avgPrice, avgTotal: avgTotal, best: best,
+      all: sorted, results: results, ctx: ctx
     };
   }
 
@@ -151,7 +160,11 @@ SC.cost = (function () {
     if (found) return { r: found, res: res };
     station.straightKm = SC.data.distanceKm(center, station);
     var r = evaluate(station, res.ctx);
-    if (r) { r.saving = res.avgTotal ? res.avgTotal - r.total : 0; r.recRank = null; }
+    if (r) {
+      r.saving = res.avgTotal ? res.avgTotal - r.total : 0;
+      r.gap = res.best ? r.total - res.best.total : 0;   // 반경·필터 밖 업장은 음수일 수 있음
+      r.recRank = null;
+    }
     return { r: r, res: res };
   }
 

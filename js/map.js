@@ -79,7 +79,7 @@ SC.map = (function () {
       var cls = 'map-marker' + (it.top ? ' map-marker--top' : '') + (it.off ? ' map-marker--off' : '') + (self.selected === it.id ? ' is-selected' : '');
       html += '<button type="button" class="' + cls + '" data-id="' + it.id + '" style="left:' + p.x + 'px;top:' + p.y + 'px" aria-label="' + SC.ui.esc(it.title || it.label) + '">' +
         (it.rank ? '<span class="map-marker__rank">' + it.rank + '</span>' : '') + SC.ui.esc(it.label) +
-        (it.sub ? '<span class="map-marker__save ' + (it.saving >= 1 ? 'is-gain' : 'is-loss') + '">' + SC.ui.esc(it.sub) + '</span>' : '') + '</button>';
+        (it.sub ? '<span class="map-marker__save ' + (it.gap < 1 ? 'is-gain' : 'is-loss') + '">' + SC.ui.esc(it.sub) + '</span>' : '') + '</button>';
     });
     this.layer.innerHTML = html;
   };
@@ -177,7 +177,7 @@ SC.map = (function () {
     var tw = text.length * 7.6, sw = sub.length * 6.6;
     var w = 20 + tw + (sub ? 6 + sw : 0);
     var bg = it.top ? '#12a150' : '#ffffff', fg = it.top ? '#ffffff' : '#121a16', bd = selected ? '#2563eb' : (it.top ? '#12a150' : '#c9d2cd');
-    var sc = it.top ? '#ffffff' : (it.saving >= 1 ? '#0b7a3b' : '#d93a3a');
+    var sc = it.top ? '#ffffff' : (it.gap < 1 ? '#0b7a3b' : '#d93a3a');
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="34">' +
       '<rect x="1" y="1" width="' + (w - 2) + '" height="24" rx="12" fill="' + bg + '" stroke="' + bd + '" stroke-width="' + (selected ? 3 : 1.5) + '"/>' +
       '<path d="M' + (w / 2 - 5) + ' 25 L' + (w / 2) + ' 32 L' + (w / 2 + 5) + ' 25z" fill="' + bg + '"/>' +

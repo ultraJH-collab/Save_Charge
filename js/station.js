@@ -47,8 +47,17 @@
 
     if (r) {
       $('st-total').textContent = U.won(r.total);
-      $('st-saving').textContent = r.saving >= 1 ? '주변 평균보다 ' + U.won(r.saving) + ' 이득' : '주변 평균보다 ' + U.won(-r.saving) + ' 더 듦';
-      $('st-saving').className = 'saving' + (r.saving >= 1 ? '' : ' saving--neg');
+      // 기준 = 반경 내 실질 비용 최저 업장
+      var best = res.best;
+      if (!best || best.station.id === station.id || Math.abs(r.gap) < 1) {
+        $('st-saving').textContent = '주변에서 실질 비용이 가장 낮은 업장이에요';
+      } else if (r.gap < 0) {
+        $('st-saving').textContent = '검색 조건 내 최저(' + best.station.name + ')보다 ' + U.won(-r.gap) + ' 저렴';
+      } else {
+        $('st-saving').innerHTML = '최저 비용 업장보다 +' + U.won(r.gap) + ' 더 듦 · <a href="station.html?id=' +
+          best.station.id + '">' + U.esc(best.station.name) + ' ' + U.won(best.total) + '</a>';
+      }
+      $('st-saving').className = 'saving' + (r.gap < 1 ? '' : ' saving--neg');
       $('st-dist-label').textContent = '기준 위치에서 (편도)';
       $('st-dist').textContent = U.km(r.travel.oneKm) + ' · ' + U.min(r.travel.oneMin);
       renderCost(r, vehicle, isEv, unit);
