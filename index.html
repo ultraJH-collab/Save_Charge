@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#12a150">
+  <meta name="description" content="가격·이동거리·이동시간을 모두 반영해 가장 이득인 주유소와 충전소를 찾아 길안내합니다.">
+  <title>SaveCharge · 가장 이득인 주유소·충전소</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="img/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/home.css">
+  <script src="js/config.js"></script>
+  <script>SC.loadTmapSdk();</script>
+  <script src="js/store.js"></script>
+</head>
+<body>
+<div class="app app--home">
+
+  <!-- ============ 검색 영역 ============ -->
+  <header class="home-head">
+    <div class="home-head__top">
+      <h1 class="logo"><span class="logo__mark" data-icon="fuel"></span>SaveCharge</h1>
+      <div class="segmented home-mode" role="group" aria-label="주유 또는 충전">
+        <button type="button" data-mode="fuel" aria-pressed="true">주유</button>
+        <button type="button" data-mode="ev" aria-pressed="false">충전</button>
+      </div>
+    </div>
+
+    <button type="button" class="vehicle-chip" id="vehicle-chip" aria-haspopup="dialog">
+      <span data-icon="car"></span>
+      <span class="vehicle-chip__name" id="vehicle-name">내 차</span>
+      <span class="vehicle-chip__spec" id="vehicle-spec">휘발유 · 12km/L</span>
+      <span class="vehicle-chip__chev" data-icon="chevron"></span>
+    </button>
+
+    <div class="field">
+      <span class="field__label">기준 위치</span>
+      <div class="chips" id="base-chips" role="group" aria-label="기준 위치 선택">
+        <button type="button" class="chip" data-base="current" data-icon="locate">현재 위치</button>
+        <button type="button" class="chip" data-base="home" data-icon="home">집</button>
+        <button type="button" class="chip" data-base="work" data-icon="work">회사</button>
+        <button type="button" class="chip" data-base="place" data-icon="search">장소 검색</button>
+        <button type="button" class="chip" data-base="pin" data-icon="pin">지도에서 선택</button>
+      </div>
+      <p class="base-label" id="base-label"><span data-icon="pin"></span><span id="base-text">위치 확인 중…</span></p>
+    </div>
+
+    <!-- 주유: 금액 / 용량 / 가득 (PRD F-03) -->
+    <div class="field" id="qty-fuel">
+      <div class="row row--between">
+        <span class="field__label">주유량</span>
+        <div class="segmented segmented--sm" role="group" aria-label="주유 방식">
+          <button type="button" data-fuel-mode="amount" aria-pressed="true">금액</button>
+          <button type="button" data-fuel-mode="volume" aria-pressed="false">용량</button>
+          <button type="button" data-fuel-mode="full" aria-pressed="false">가득</button>
+        </div>
+      </div>
+      <div class="chips" id="qty-presets" role="group" aria-label="주유량 프리셋"></div>
+    </div>
+
+    <!-- 충전: 현재/목표 SOC -->
+    <div class="field" id="qty-ev" hidden>
+      <span class="field__label">충전량</span>
+      <button type="button" class="soc-bar" id="soc-bar" aria-haspopup="dialog">
+        <span class="soc-bar__track"><span class="soc-bar__now" id="soc-now-bar"></span><span class="soc-bar__add" id="soc-add-bar"></span></span>
+        <span class="soc-bar__text"><strong id="soc-text">20% → 80%</strong> <span class="muted" id="soc-kwh">50.4kWh 필요</span></span>
+      </button>
+    </div>
+  </header>
+
+  <main class="home-body">
+    <!-- ============ 지도 ============ -->
+    <section class="home-map map" aria-label="지도">
+      <div id="map" class="map__canvas"></div>
+      <div class="map-pick-hint" id="pick-hint" hidden>지도에서 기준 위치를 눌러 주세요</div>
+      <div class="map-ctrl" style="top:12px">
+        <button type="button" class="icon-btn" id="btn-recenter" aria-label="기준 위치로 이동" data-icon="locate"></button>
+        <button type="button" class="icon-btn" id="btn-zoom-in" aria-label="확대" data-icon="plus"></button>
+        <button type="button" class="icon-btn" id="btn-zoom-out" aria-label="축소"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+      </div>
+    </section>
+
+    <!-- ============ 추천 결과 ============ -->
+    <section class="results" aria-labelledby="results-title">
+      <div class="results__head">
+        <div class="grow">
+          <h2 id="results-title" class="results__title">추천 업장</h2>
+          <p class="small muted" id="results-summary">-</p>
+        </div>
+        <button type="button" class="btn btn--sm" id="btn-cond" data-icon="filter">조건</button>
+      </div>
+
+      <div class="chips sort-tabs" role="tablist" aria-label="정렬 기준" id="sort-tabs">
+        <button type="button" class="chip" role="tab" data-sort="recommend">추천(종합)</button>
+        <button type="button" class="chip" role="tab" data-sort="price">최저가</button>
+        <button type="button" class="chip" role="tab" data-sort="distance">최단거리</button>
+        <button type="button" class="chip" role="tab" data-sort="time">최단시간</button>
+      </div>
+
+      <div class="banner" id="estimate-banner">
+        <span data-icon="info"></span>
+        <span>거리·시간은 직선거리 기반 <b>예상치</b>입니다. 상위 3곳은 T map 실시간 경로로 보정됩니다. <button type="button" class="link-btn" id="btn-how">계산 방법</button></span>
+      </div>
+
+      <ol class="result-list" id="result-list" aria-live="polite"></ol>
+    </section>
+  </main>
+
+  <nav data-tabbar="home"></nav>
+</div>
+
+<!-- ============ 시트: 검색 조건 ============ -->
+<section class="sheet" id="sheet-cond" role="dialog" aria-modal="true" aria-labelledby="cond-title" hidden>
+  <div class="sheet__handle"></div>
+  <div class="sheet__head">
+    <h2 id="cond-title">검색 조건</h2>
+    <button type="button" class="icon-btn" data-close-sheet aria-label="닫기" data-icon="close"></button>
+  </div>
+  <div class="sheet__body">
+    <div class="field">
+      <span class="field__label">검색 반경</span>
+      <div class="segmented" role="group" aria-label="검색 반경" id="cond-radius">
+        <button type="button" data-v="1">1km</button>
+        <button type="button" data-v="3">3km</button>
+        <button type="button" data-v="5">5km</button>
+        <button type="button" data-v="10">10km</button>
+      </div>
+    </div>
+
+    <!-- 주유 조건 -->
+    <div class="stack" id="cond-fuel">
+      <div class="field">
+        <span class="field__label">주유 방식</span>
+        <div class="segmented" role="group" aria-label="주유 방식" id="cond-fuel-mode">
+          <button type="button" data-v="amount">금액</button>
+          <button type="button" data-v="volume">용량</button>
+          <button type="button" data-v="full">가득</button>
+        </div>
+      </div>
+      <label class="field" id="cond-amount-field">
+        <span class="field__label">주유 금액</span>
+        <span class="input-group"><input class="input num" type="number" inputmode="numeric" min="5000" step="1000" id="cond-amount"><span class="input-group__unit">원</span></span>
+      </label>
+      <label class="field" id="cond-volume-field">
+        <span class="field__label">주유 용량</span>
+        <span class="input-group"><input class="input num" type="number" inputmode="decimal" min="1" step="1" id="cond-volume"><span class="input-group__unit">L</span></span>
+      </label>
+      <div class="field" id="cond-level-field">
+        <label class="field__label" for="cond-level">현재 연료 잔량 <span class="brand-text" id="cond-level-v">20%</span></label>
+        <input class="range" type="range" min="0" max="90" step="5" id="cond-level">
+        <span class="field__hint" id="cond-level-hint">-</span>
+      </div>
+
+      <div class="field">
+        <span class="field__label">브랜드</span>
+        <div class="chips chips--wrap" id="cond-brands"></div>
+      </div>
+      <div class="field">
+        <span class="field__label">부대시설</span>
+        <div class="check-grid">
+          <label class="check"><input type="checkbox" data-filter="self"> 셀프주유소</label>
+          <label class="check"><input type="checkbox" data-filter="alddeul"> 알뜰주유소</label>
+          <label class="check"><input type="checkbox" data-filter="carwash"> 세차장</label>
+          <label class="check"><input type="checkbox" data-filter="store"> 편의점</label>
+          <label class="check"><input type="checkbox" data-filter="open24"> 24시간</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 충전 조건 -->
+    <div class="stack" id="cond-ev" hidden>
+      <div class="field">
+        <label class="field__label" for="cond-soc-now">현재 배터리 <span class="brand-text" id="cond-soc-now-v">20%</span></label>
+        <input class="range" type="range" min="0" max="95" step="5" id="cond-soc-now">
+      </div>
+      <div class="field">
+        <label class="field__label" for="cond-soc-target">목표 배터리 <span class="brand-text" id="cond-soc-target-v">80%</span></label>
+        <input class="range" type="range" min="10" max="100" step="5" id="cond-soc-target">
+        <span class="field__hint" id="cond-soc-hint">-</span>
+      </div>
+      <div class="field">
+        <span class="field__label">최소 충전 속도</span>
+        <div class="segmented" role="group" aria-label="최소 충전 속도" id="cond-minkw">
+          <button type="button" data-v="0">전체</button>
+          <button type="button" data-v="50">50kW+</button>
+          <button type="button" data-v="100">100kW+</button>
+          <button type="button" data-v="200">200kW+</button>
+        </div>
+      </div>
+      <div class="field">
+        <span class="field__label">충전 사업자</span>
+        <div class="chips chips--wrap" id="cond-operators"></div>
+      </div>
+      <div class="check-grid">
+        <label class="check"><input type="checkbox" data-filter="onlyAvailable"> 지금 비어 있는 곳만</label>
+        <label class="check"><input type="checkbox" data-filter="open24"> 24시간</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="cond-vot">내 시간 가치 <span class="brand-text" id="cond-vot-v">10,000원/시간</span></label>
+      <input class="range" type="range" min="0" max="30000" step="1000" id="cond-vot">
+      <div class="range-row"><span>가격 우선</span><span>시간 우선</span></div>
+      <span class="field__hint">이동·대기 시간을 비용으로 환산합니다. 0원이면 순수 지출만 비교합니다.</span>
+    </div>
+  </div>
+  <div class="sheet__foot">
+    <button type="button" class="btn" id="cond-reset">초기화</button>
+    <button type="button" class="btn btn--primary" id="cond-apply">적용</button>
+  </div>
+</section>
+
+<!-- ============ 시트: 장소 검색 ============ -->
+<section class="sheet" id="sheet-place" role="dialog" aria-modal="true" aria-labelledby="place-title" hidden>
+  <div class="sheet__handle"></div>
+  <div class="sheet__head">
+    <h2 id="place-title">기준 위치 검색</h2>
+    <button type="button" class="icon-btn" data-close-sheet aria-label="닫기" data-icon="close"></button>
+  </div>
+  <div class="sheet__body">
+    <div class="search-box">
+      <span data-icon="search"></span>
+      <input class="input" type="search" id="place-q" placeholder="주소 또는 장소명 (예: 강남역)" autocomplete="off" aria-label="주소 또는 장소명">
+    </div>
+    <ul class="card card--flush list" id="place-list" aria-live="polite"></ul>
+    <button type="button" class="btn btn--block" id="btn-pick-map" data-icon="pin">지도에서 직접 선택</button>
+  </div>
+</section>
+
+<!-- ============ 시트: 차량 선택 ============ -->
+<section class="sheet" id="sheet-vehicle" role="dialog" aria-modal="true" aria-labelledby="veh-title" hidden>
+  <div class="sheet__handle"></div>
+  <div class="sheet__head">
+    <h2 id="veh-title">차량 선택</h2>
+    <button type="button" class="icon-btn" data-close-sheet aria-label="닫기" data-icon="close"></button>
+  </div>
+  <div class="sheet__body">
+    <ul class="card card--flush list" id="veh-list"></ul>
+    <a class="btn btn--block" href="vehicle.html" data-icon="edit">차량 관리</a>
+  </div>
+</section>
+
+<!-- ============ 시트: 계산 방법 ============ -->
+<section class="sheet" id="sheet-how" role="dialog" aria-modal="true" aria-labelledby="how-title" hidden>
+  <div class="sheet__handle"></div>
+  <div class="sheet__head">
+    <h2 id="how-title">추천 순위는 이렇게 계산해요</h2>
+    <button type="button" class="icon-btn" data-close-sheet aria-label="닫기" data-icon="close"></button>
+  </div>
+  <div class="sheet__body how">
+    <p>단가만 보지 않고, 그곳까지 다녀오는 비용까지 더한 <b>실질 비용</b>이 가장 낮은 순서로 추천합니다.</p>
+    <div class="how__formula">실질 비용 = 주유(충전)비 + 이동 연료비 + 시간 비용 + 통행료</div>
+    <ul class="how__list">
+      <li><b>주유비</b> 단가 × 주유량 (금액 모드는 주변 평균단가로 같은 양을 비교)</li>
+      <li><b>이동 연료비</b> 왕복 거리 ÷ 내 차 연비 × 단가</li>
+      <li><b>시간 비용</b> 왕복 시간(충전은 대기·충전 시간 포함) × 내 시간 가치</li>
+      <li><b>통행료</b> T map 경로 응답의 요금</li>
+    </ul>
+    <p class="small muted">거리·시간은 직선거리 × 1.3, 평균 25km/h 로 추정하며, 상위 3곳만 T map 실시간 경로로 보정합니다.</p>
+  </div>
+</section>
+
+<script src="js/data.js"></script>
+<script src="js/cost.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/map.js"></script>
+<script src="js/home.js"></script>
+</body>
+</html>

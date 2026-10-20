@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#12a150">
+  <title>내 차량 · SaveCharge</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="img/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <h1>내 차량</h1>
+    <div class="topbar__actions">
+      <button type="button" class="icon-btn" id="btn-add" aria-label="차량 추가" data-icon="plus"></button>
+    </div>
+  </header>
+
+  <main class="page">
+    <p class="small text-2">추천에 쓸 차량을 고르세요. 연비와 용량은 이동 연료비와 주유·충전량 계산에 쓰입니다.</p>
+    <ul class="stack" id="vehicle-list" aria-label="등록된 차량"></ul>
+    <button type="button" class="btn btn--block" id="btn-add-2" data-icon="plus">차량 추가</button>
+  </main>
+
+  <nav data-tabbar="vehicle"></nav>
+</div>
+
+<!-- 시트: 차량 추가/편집 -->
+<section class="sheet" id="sheet-edit" role="dialog" aria-modal="true" aria-labelledby="edit-title" hidden>
+  <div class="sheet__handle"></div>
+  <div class="sheet__head">
+    <h2 id="edit-title">차량 추가</h2>
+    <button type="button" class="icon-btn" data-close-sheet aria-label="닫기" data-icon="close"></button>
+  </div>
+  <form class="sheet__body" id="edit-form" novalidate>
+    <div class="field suggest">
+      <label class="field__label" for="f-model">차종 검색</label>
+      <div class="search-box">
+        <span data-icon="search"></span>
+        <input class="input" id="f-model" placeholder="예: 쏘나타, EV6" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="f-model-list">
+      </div>
+      <ul class="suggest__list list" id="f-model-list" role="listbox" hidden></ul>
+      <span class="field__hint">선택하면 연비·용량이 자동 입력됩니다 (공인연비 참고용 예시값).</span>
+    </div>
+
+    <label class="field">
+      <span class="field__label">차량 별칭</span>
+      <input class="input" id="f-name" maxlength="20" placeholder="예: 출퇴근 차" required>
+    </label>
+
+    <div class="field">
+      <span class="field__label">유종</span>
+      <div class="chips chips--wrap" id="f-fuel" role="group" aria-label="유종">
+        <button type="button" class="chip" data-v="gasoline">휘발유</button>
+        <button type="button" class="chip" data-v="diesel">경유</button>
+        <button type="button" class="chip" data-v="premium">고급휘발유</button>
+        <button type="button" class="chip" data-v="lpg">LPG</button>
+        <button type="button" class="chip" data-v="ev">전기</button>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <label class="field">
+        <span class="field__label" id="f-eff-label">연비</span>
+        <span class="input-group"><input class="input num" type="number" step="0.1" min="1" id="f-eff" required><span class="input-group__unit" id="f-eff-unit">km/L</span></span>
+      </label>
+      <label class="field">
+        <span class="field__label" id="f-cap-label">연료탱크</span>
+        <span class="input-group"><input class="input num" type="number" step="1" min="1" id="f-cap" required><span class="input-group__unit" id="f-cap-unit">L</span></span>
+      </label>
+      <label class="field" data-ev-only>
+        <span class="field__label">충전 커넥터</span>
+        <select class="select" id="f-conn"></select>
+      </label>
+      <label class="field" data-ev-only>
+        <span class="field__label">최대 충전 출력</span>
+        <span class="input-group"><input class="input num" type="number" step="1" min="3" id="f-kw"><span class="input-group__unit">kW</span></span>
+      </label>
+    </div>
+  </form>
+  <div class="sheet__foot">
+    <button type="button" class="btn btn--danger" id="btn-delete" hidden>삭제</button>
+    <button type="submit" form="edit-form" class="btn btn--primary">저장</button>
+  </div>
+</section>
+
+<script src="js/data.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/vehicle.js"></script>
+</body>
+</html>

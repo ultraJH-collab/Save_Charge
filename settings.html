@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#12a150">
+  <title>설정 · SaveCharge</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="img/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="topbar"><h1>설정</h1></header>
+
+  <main class="page">
+    <!-- 계정 (PRD F-16) -->
+    <section aria-labelledby="acc-title">
+      <h2 class="section-title" id="acc-title">계정</h2>
+      <div class="card stack">
+        <p class="small text-2">로그인하면 차량·즐겨찾기·절약 기록이 기기 간에 동기화됩니다. 지금은 이 기기에만 저장돼요.</p>
+        <div class="btn-row">
+          <button type="button" class="btn social-btn social-btn--kakao" data-login="카카오">카카오 로그인</button>
+          <button type="button" class="btn social-btn social-btn--naver" data-login="네이버">네이버 로그인</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 추천 기준 -->
+    <section aria-labelledby="rec-title">
+      <h2 class="section-title" id="rec-title">추천 기준</h2>
+      <div class="card stack">
+        <div class="field">
+          <label class="field__label" for="set-vot">기본 시간 가치 <span class="brand-text" id="set-vot-v">-</span></label>
+          <input class="range" type="range" min="0" max="30000" step="1000" id="set-vot">
+          <div class="range-row"><span>0원 (가격만 비교)</span><span>30,000원</span></div>
+        </div>
+        <div class="field">
+          <span class="field__label">기본 검색 반경</span>
+          <div class="segmented" role="group" aria-label="기본 검색 반경" id="set-radius">
+            <button type="button" data-v="1">1km</button>
+            <button type="button" data-v="3">3km</button>
+            <button type="button" data-v="5">5km</button>
+            <button type="button" data-v="10">10km</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 카드·멤버십 할인 (PRD F-13) -->
+    <section aria-labelledby="disc-title">
+      <h2 class="section-title" id="disc-title">카드·멤버십 할인</h2>
+      <div class="card card--flush">
+        <ul class="list" id="disc-list"></ul>
+        <form class="discount-row" id="disc-form" style="border-top:1px solid var(--border)">
+          <select class="select discount-row__brand" id="disc-brand" aria-label="적용 브랜드"></select>
+          <input class="input" id="disc-label" placeholder="카드·멤버십 이름" aria-label="카드 또는 멤버십 이름">
+          <span class="input-group"><input class="input num" type="number" min="1" id="disc-amount" placeholder="60" aria-label="리터당 할인액"><span class="input-group__unit">원/L</span></span>
+          <button type="submit" class="btn btn--primary btn--sm discount-row__add" data-icon="plus">추가</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 길안내·화면·알림 -->
+    <section aria-labelledby="app-title">
+      <h2 class="section-title" id="app-title">앱 설정</h2>
+      <ul class="card card--flush list">
+        <li class="setting-row">
+          <div class="setting-row__body"><p class="setting-row__title">기본 길안내 앱</p><p class="setting-row__desc">길안내 버튼을 누르면 바로 실행돼요</p></div>
+          <select class="select" id="set-nav" aria-label="기본 길안내 앱">
+            <option value="">매번 선택</option>
+            <option value="tmap">T map</option>
+            <option value="kakao">카카오맵</option>
+            <option value="naver">네이버지도</option>
+          </select>
+        </li>
+        <li class="setting-row">
+          <div class="setting-row__body"><p class="setting-row__title">화면 테마</p><p class="setting-row__desc">야간 운전 시 다크 모드를 권장해요</p></div>
+          <select class="select" id="set-theme" aria-label="화면 테마">
+            <option value="system">시스템 설정</option>
+            <option value="light">라이트</option>
+            <option value="dark">다크</option>
+          </select>
+        </li>
+        <li class="setting-row">
+          <div class="setting-row__body"><p class="setting-row__title">가격 알림 푸시</p><p class="setting-row__desc" id="push-desc">목표가 도달 시 브라우저 알림</p></div>
+          <label class="switch"><input type="checkbox" id="set-push" aria-label="가격 알림 푸시"></label>
+        </li>
+        <li class="setting-row">
+          <div class="setting-row__body"><p class="setting-row__title">홈 화면에 추가</p><p class="setting-row__desc">앱처럼 바로 실행 (PWA)</p></div>
+          <button type="button" class="btn btn--sm" id="btn-install">추가</button>
+        </li>
+      </ul>
+    </section>
+
+    <!-- 정보 -->
+    <section aria-labelledby="info-title">
+      <h2 class="section-title" id="info-title">정보</h2>
+      <ul class="card card--flush list">
+        <li class="setting-row"><div class="setting-row__body"><p class="setting-row__title">데이터 출처</p><p class="setting-row__desc">유가: 한국석유공사 오피넷 · 충전소: 한국환경공단 · 경로: T map</p></div></li>
+        <li class="setting-row"><div class="setting-row__body"><p class="setting-row__title">위치정보 처리</p><p class="setting-row__desc">위치는 검색에만 사용하며 서버에 저장하지 않습니다</p></div></li>
+        <li class="setting-row"><div class="setting-row__body"><p class="setting-row__title">안전 안내</p><p class="setting-row__desc">운전 중에는 조작하지 마시고 정차 후 이용해 주세요</p></div></li>
+        <li class="setting-row"><div class="setting-row__body"><p class="setting-row__title">버전</p><p class="setting-row__desc">0.1.0 (퍼블리싱)</p></div></li>
+      </ul>
+    </section>
+
+    <div class="btn-row">
+      <a class="btn" href="onboarding.html">초기 설정 다시 하기</a>
+      <button type="button" class="btn btn--danger" id="btn-reset">데이터 초기화</button>
+    </div>
+  </main>
+
+  <nav data-tabbar="settings"></nav>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/settings.js"></script>
+</body>
+</html>

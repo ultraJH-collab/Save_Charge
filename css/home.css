@@ -1,0 +1,110 @@
+/* =========================================================
+   홈 (검색 + 지도 + 추천 결과)
+   모바일: 검색 → 지도(40vh) → 결과 리스트
+   데스크톱(≥960px): 좌측 패널(검색+결과) / 우측 지도
+   ========================================================= */
+
+.home-head {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px 14px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.home-head__top { display: flex; align-items: center; gap: 12px; }
+.logo { flex: 1; display: flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 800; letter-spacing: -.02em; }
+.logo__mark {
+  width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center;
+  background: var(--brand); color: var(--brand-ink);
+}
+.logo__mark .icon { width: 20px; height: 20px; }
+.home-mode { width: 148px; }
+
+.vehicle-chip {
+  display: flex; align-items: center; gap: 8px;
+  min-height: 48px; padding: 0 12px;
+  border-radius: var(--radius); background: var(--surface-2); border: 1px solid var(--border);
+  text-align: left;
+}
+.vehicle-chip__name { font-weight: 700; }
+.vehicle-chip__spec { flex: 1; color: var(--text-3); font-size: 13px; }
+.vehicle-chip__chev { color: var(--text-3); }
+
+.base-label { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--text-2); }
+.base-label .icon { width: 16px; height: 16px; color: var(--danger); }
+
+.segmented--sm { padding: 3px; }
+.segmented--sm button { min-height: 32px; padding: 0 12px; font-size: 13px; }
+
+.soc-bar {
+  display: flex; flex-direction: column; gap: 6px; width: 100%;
+  padding: 12px; border-radius: var(--radius); background: var(--surface-2); border: 1px solid var(--border); text-align: left;
+}
+.soc-bar__track { position: relative; height: 10px; border-radius: 5px; background: var(--border); overflow: hidden; display: flex; }
+.soc-bar__now { background: var(--text-3); height: 100%; }
+.soc-bar__add { background: var(--brand); height: 100%; }
+.soc-bar__text { font-size: 14px; }
+
+/* ---------- 지도 ---------- */
+.home-map { height: 40vh; min-height: 260px; }
+
+/* ---------- 결과 ---------- */
+.results { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.results__head { display: flex; align-items: flex-start; gap: 12px; }
+.results__title { font-size: 18px; font-weight: 800; }
+.link-btn { color: inherit; text-decoration: underline; font-weight: 700; }
+
+.result-list { display: flex; flex-direction: column; gap: 10px; }
+.result {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-l);
+  overflow: hidden; transition: border-color .15s, box-shadow .15s;
+}
+.result.is-selected { border-color: var(--info); box-shadow: 0 0 0 3px var(--info-soft); }
+.result--top { border-color: var(--brand); }
+.result__main { display: flex; gap: 12px; padding: 14px 14px 10px; width: 100%; text-align: left; align-items: flex-start; }
+.result__rank {
+  flex: none; width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center; font-weight: 800; font-size: 14px;
+  background: var(--surface-2); color: var(--text-2);
+}
+.result--top .result__rank { background: var(--brand); color: var(--brand-ink); }
+.result__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.result__title { display: flex; align-items: center; gap: 6px; font-weight: 700; }
+.result__title .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.brand-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--c, var(--text-3)); }
+.result__meta { font-size: 13px; color: var(--text-2); display: flex; flex-wrap: wrap; gap: 0 12px; }
+.result__price { font-size: 13px; color: var(--text-2); }
+.result__price strong { font-size: 17px; color: var(--text); font-weight: 800; }
+.result__price del { color: var(--text-3); margin-left: 4px; }
+.result__badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 2px; }
+.result__cost { flex: none; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.result__cost .label { font-size: 11px; color: var(--text-3); }
+.result__cost strong { font-size: 17px; font-weight: 800; }
+.saving { font-size: 12px; font-weight: 700; color: var(--brand-strong); }
+.saving--neg { color: var(--text-3); font-weight: 600; }
+.result__actions { display: flex; gap: 8px; padding: 0 14px 14px 54px; }
+.result__actions .btn { flex: 1; min-height: 44px; }
+
+.chips--wrap { flex-wrap: wrap; overflow: visible; }
+.check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+
+.how { gap: 14px; }
+.how__formula { padding: 12px 14px; border-radius: var(--radius); background: var(--brand-soft); color: var(--brand-strong); font-weight: 700; font-size: 14px; }
+.how__list { display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+.how__list b { display: inline-block; min-width: 84px; }
+
+/* ---------- 데스크톱 ---------- */
+@media (min-width: 960px) {
+  .app--home {
+    max-width: none; height: 100dvh; padding-bottom: 0;
+    display: grid; grid-template-columns: 440px 1fr; grid-template-rows: auto 1fr;
+  }
+  .app--home .home-head { grid-column: 1; grid-row: 1; border-right: 1px solid var(--border); }
+  .app--home .home-body { display: contents; }
+  .app--home .home-map { grid-column: 2; grid-row: 1 / 3; height: auto; }
+  .app--home .results {
+    grid-column: 1; grid-row: 2; overflow-y: auto; border-right: 1px solid var(--border);
+    padding-bottom: calc(var(--tabbar-h) + 16px);
+  }
+  .app--home .tabbar { left: 0; transform: none; width: 440px; max-width: 440px; }
+  .app--home ~ .toast, .toast { bottom: calc(var(--tabbar-h) + 16px); }
+}

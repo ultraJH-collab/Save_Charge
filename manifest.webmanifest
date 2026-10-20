@@ -1,0 +1,14 @@
+{
+  "name": "SaveCharge - 가장 이득인 주유소·충전소",
+  "short_name": "SaveCharge",
+  "description": "가격·이동거리·이동시간을 반영해 가장 이득인 주유소와 충전소를 찾아 길안내합니다.",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f6f4",
+  "theme_color": "#12a150",
+  "lang": "ko",
+  "icons": [
+    { "src": "img/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

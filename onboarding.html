@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#12a150">
+  <title>시작하기 · SaveCharge</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="img/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+</head>
+<body>
+<div class="app app--plain">
+  <main class="onb">
+    <div class="onb__top">
+      <div class="onb__dots" aria-hidden="true"><span class="is-on"></span><span></span><span></span></div>
+      <p class="sr-only" id="onb-progress" aria-live="polite">1/3 단계</p>
+      <button type="button" class="btn btn--ghost btn--sm" id="btn-skip">건너뛰기</button>
+    </div>
+
+    <!-- 1. 유종 -->
+    <section class="onb__step" data-step="1" aria-labelledby="s1-title">
+      <h1 class="onb__title" id="s1-title">어떤 연료를<br>쓰시나요?</h1>
+      <p class="onb__desc">연료에 맞는 주유소·충전소와 가격으로 추천해 드려요.</p>
+      <div class="option-grid" role="group" aria-labelledby="s1-title" id="fuel-options">
+        <button type="button" class="option" data-fuel="gasoline" aria-pressed="true" data-icon="fuel">휘발유</button>
+        <button type="button" class="option" data-fuel="diesel" aria-pressed="false" data-icon="fuel">경유</button>
+        <button type="button" class="option" data-fuel="premium" aria-pressed="false" data-icon="fuel">고급휘발유</button>
+        <button type="button" class="option" data-fuel="lpg" aria-pressed="false" data-icon="fuel">LPG</button>
+        <button type="button" class="option" data-fuel="ev" aria-pressed="false" data-icon="bolt">전기<small>급속·완속 충전소</small></button>
+      </div>
+    </section>
+
+    <!-- 2. 차종 / 연비 -->
+    <section class="onb__step" data-step="2" aria-labelledby="s2-title" hidden>
+      <h1 class="onb__title" id="s2-title">차종과 연비를<br>알려 주세요</h1>
+      <p class="onb__desc">이동 연료비를 계산하는 데 써요. 모르면 기본값으로 두셔도 됩니다.</p>
+      <div class="form-grid">
+        <div class="field span-2 suggest">
+          <label class="field__label" for="onb-model">차종 검색</label>
+          <div class="search-box">
+            <span data-icon="search"></span>
+            <input class="input" id="onb-model" placeholder="예: 아반떼, 아이오닉5" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="onb-model-list">
+          </div>
+          <ul class="suggest__list list" id="onb-model-list" role="listbox" hidden></ul>
+        </div>
+        <label class="field">
+          <span class="field__label" id="onb-eff-label">연비</span>
+          <span class="input-group"><input class="input num" type="number" step="0.1" min="1" id="onb-eff" value="12"><span class="input-group__unit" id="onb-eff-unit">km/L</span></span>
+        </label>
+        <label class="field">
+          <span class="field__label" id="onb-cap-label">연료탱크</span>
+          <span class="input-group"><input class="input num" type="number" step="1" min="1" id="onb-cap" value="55"><span class="input-group__unit" id="onb-cap-unit">L</span></span>
+        </label>
+        <label class="field" data-ev-only hidden>
+          <span class="field__label">충전 커넥터</span>
+          <select class="select" id="onb-conn"></select>
+        </label>
+        <label class="field" data-ev-only hidden>
+          <span class="field__label">최대 충전 출력</span>
+          <span class="input-group"><input class="input num" type="number" step="1" min="3" id="onb-kw" value="200"><span class="input-group__unit">kW</span></span>
+        </label>
+      </div>
+      <p class="xsmall muted">차종 목록의 연비는 공인연비 참고용 예시값입니다.</p>
+    </section>
+
+    <!-- 3. 위치 권한 -->
+    <section class="onb__step" data-step="3" aria-labelledby="s3-title" hidden>
+      <h1 class="onb__title" id="s3-title">내 주변에서<br>바로 찾아 드릴게요</h1>
+      <div class="onb__hero">
+        <span data-icon="locate"></span>
+        <p class="bold">현재 위치 기준으로 가장 이득인 곳을 추천해요.</p>
+        <p class="small text-2">위치는 검색에만 쓰고 서버에 저장하지 않아요. 권한을 허용하지 않아도 주소 검색이나 지도에서 직접 위치를 고를 수 있어요.</p>
+      </div>
+      <p class="small muted" id="loc-result" aria-live="polite"></p>
+    </section>
+
+    <div class="onb__foot">
+      <button type="button" class="btn" id="btn-prev" hidden>이전</button>
+      <button type="button" class="btn btn--primary" id="btn-next">다음</button>
+    </div>
+  </main>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/onboarding.js"></script>
+</body>
+</html>

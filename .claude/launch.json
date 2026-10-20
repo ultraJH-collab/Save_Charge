@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "savecharge",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["C:\\Users\\공군10~1\\AppData\\Local\\Temp\\claude\\C--Users---10------PC05-Desktop-Airforce-d-2-SaveCharge\\865acb8a-8837-4cc6-ae01-b1d2278d8662\\scratchpad\\serve.js", "C:\\Users\\공군10전투비행단-PC05\\Desktop\\Airforce\\d_2\\SaveCharge", "5173"],
+      "port": 5173
+    }
+  ]
+}

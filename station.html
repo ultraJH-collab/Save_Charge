@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#12a150">
+  <title>업장 상세 · SaveCharge</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="img/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="icon-btn" href="index.html" aria-label="뒤로" data-icon="back" onclick="if(history.length>1){history.back();return false;}"></a>
+    <h1>업장 상세</h1>
+    <div class="topbar__actions">
+      <button type="button" class="icon-btn" id="btn-fav" aria-pressed="false" aria-label="즐겨찾기" data-icon="star"></button>
+    </div>
+  </header>
+
+  <main class="page" id="station-page">
+    <!-- 요약 -->
+    <section class="card station-head">
+      <div class="row">
+        <span class="brand-dot brand-dot--lg" id="st-dot"></span>
+        <div class="grow">
+          <h2 class="station-head__name" id="st-name">-</h2>
+          <p class="small muted" id="st-brand">-</p>
+        </div>
+      </div>
+      <p class="small text-2 row" id="st-addr"><span data-icon="pin"></span><span id="st-addr-text">-</span></p>
+      <div class="result__badges" id="st-badges"></div>
+      <div class="station-hero">
+        <div>
+          <p class="xsmall muted">실질 비용 (현재 조건)</p>
+          <p class="station-hero__total num" id="st-total">-</p>
+          <p class="saving" id="st-saving">-</p>
+        </div>
+        <div class="station-hero__side">
+          <p class="xsmall muted" id="st-dist-label">기준 위치에서</p>
+          <p class="bold num" id="st-dist">-</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 비용 구성 (PRD 6장) -->
+    <section aria-labelledby="cost-title">
+      <h3 class="section-title" id="cost-title">비용 구성</h3>
+      <div class="card">
+        <div class="cost-bar" id="cost-bar" aria-hidden="true"></div>
+        <dl class="kv cost-kv" id="cost-kv"></dl>
+        <p class="xsmall muted" id="cost-note">-</p>
+      </div>
+    </section>
+
+    <!-- 가격 / 충전기 -->
+    <section aria-labelledby="price-title">
+      <h3 class="section-title row row--between" id="price-title"><span id="price-title-text">유종별 가격</span><span class="xsmall muted" id="st-updated">-</span></h3>
+      <div class="card card--flush">
+        <ul class="list" id="price-list"></ul>
+      </div>
+    </section>
+
+    <!-- 가격 추이 (PRD F-12) -->
+    <section aria-labelledby="trend-title" id="trend-section">
+      <h3 class="section-title" id="trend-title">30일 가격 추이</h3>
+      <div class="card">
+        <div class="row row--between small">
+          <span class="muted" id="trend-range">-</span>
+          <span class="bold" id="trend-hint">-</span>
+        </div>
+        <div class="trend" id="trend-chart"></div>
+      </div>
+    </section>
+
+    <!-- 정보 -->
+    <section aria-labelledby="info-title">
+      <h3 class="section-title" id="info-title">업장 정보</h3>
+      <div class="card">
+        <div class="amenities" id="amenities"></div>
+        <hr class="divider" style="margin:14px 0">
+        <dl class="kv" id="info-kv"></dl>
+      </div>
+    </section>
+
+    <div class="btn-row">
+      <button type="button" class="btn" id="btn-alert" data-icon="bell">가격 알림</button>
+      <button type="button" class="btn" id="btn-report" data-icon="flag">가격 제보</button>
+    </div>
+  </main>
+
+  <div class="sticky-cta">
+    <button type="button" class="btn btn--primary btn--block" id="btn-nav" data-icon="nav">길안내 시작</button>
+  </div>
+
+  <nav data-tabbar="home"></nav>
+</div>
+
+<!-- 시트: 가격 알림 -->
+<section class="sheet" id="sheet-alert" role="dialog" aria-modal="true" aria-labelledby="alert-title" hidden>
+  <div class="sheet__handle"></div>
+  <div class="sheet__head">
+    <h2 id="alert-title">가격 알림 설정</h2>
+    <button type="button" class="icon-btn" data-close-sheet aria-label="닫기" data-icon="close"></button>
+  </div>
+  <div class="sheet__body">
+    <p class="small text-2" id="alert-desc">-</p>
+    <label class="field">
+      <span class="field__label">목표 단가</span>
+      <span class="input-group"><input class="input num" type="number" inputmode="numeric" id="alert-target"><span class="input-group__unit" id="alert-unit">원/L</span></span>
+      <span class="field__hint">이 가격 이하로 내려가면 알려드려요. (웹 푸시)</span>
+    </label>
+  </div>
+  <div class="sheet__foot">
+    <button type="button" class="btn" data-close-sheet>취소</button>
+    <button type="button" class="btn btn--primary" id="alert-save">알림 저장</button>
+  </div>
+</section>
+
+<!-- 시트: 가격 제보 (PRD F-15) -->
+<section class="sheet" id="sheet-report" role="dialog" aria-modal="true" aria-labelledby="report-title" hidden>
+  <div class="sheet__handle"></div>
+  <div class="sheet__head">
+    <h2 id="report-title">가격 제보</h2>
+    <button type="button" class="icon-btn" data-close-sheet aria-label="닫기" data-icon="close"></button>
+  </div>
+  <form class="sheet__body" id="report-form">
+    <label class="field">
+      <span class="field__label">항목</span>
+      <select class="select" id="report-fuel"></select>
+    </label>
+    <label class="field">
+      <span class="field__label">현장 가격</span>
+      <span class="input-group"><input class="input num" type="number" inputmode="numeric" id="report-price" required><span class="input-group__unit" id="report-unit">원</span></span>
+    </label>
+    <div class="field">
+      <span class="field__label">유형</span>
+      <div class="check-grid">
+        <label class="check"><input type="radio" name="report-type" value="price" checked> 가격 다름</label>
+        <label class="check"><input type="radio" name="report-type" value="closed"> 영업 안 함</label>
+        <label class="check"><input type="radio" name="report-type" value="broken"> 충전기 고장</label>
+        <label class="check"><input type="radio" name="report-type" value="etc"> 기타</label>
+      </div>
+    </div>
+    <p class="xsmall muted">제보가 여러 건 쌓이면 확인 전까지 가격에 "확인 필요" 표시가 붙습니다.</p>
+  </form>
+  <div class="sheet__foot">
+    <button type="button" class="btn" data-close-sheet>취소</button>
+    <button type="submit" form="report-form" class="btn btn--primary">제보하기</button>
+  </div>
+</section>
+
+<script src="js/data.js"></script>
+<script src="js/cost.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/station.js"></script>
+</body>
+</html>
